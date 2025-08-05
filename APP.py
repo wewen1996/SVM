@@ -7,17 +7,13 @@ import shap
 import matplotlib.pyplot as plt
 ```
 
-```plaintext
-加载保存的随机森林模型
-```
+## 加载保存的随机森林模型
 
 ```plaintext
 model = joblib.load('svm_model.pkl')
 ```
 
-```plaintext
-特征范围定义（根据提供的特征范围和数据类型）
-```
+## 特征范围定义（根据提供的特征范围和数据类型）
 
 ```plaintext
 feature_ranges = {
@@ -40,17 +36,13 @@ feature_ranges = {
 }
 ```
 
-```plaintext
-Streamlit 界面
-```
+## Streamlit 界面
 
 ```plaintext
 st.title("Prediction Model with SHAP Visualization")
 ```
 
-```plaintext
-动态生成输入项
-```
+## 动态生成输入项
 
 ```plaintext
 st.header("Enter the following feature values:")
@@ -71,17 +63,13 @@ for feature, properties in feature_ranges.items():
     feature_values.append(value)
 ```
 
-```plaintext
-转换为模型输入格式
-```
+## 转换为模型输入格式
 
 ```plaintext
 features = np.array([feature_values])
 ```
 
-```plaintext
-预测与 SHAP 可视化
-```
+## 预测与 SHAP 可视化
 
 ```plaintext
 if st.button("Predict"):
