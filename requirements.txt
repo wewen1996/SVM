@@ -1,3 +1,4 @@
+python==3.9.21
 pandas==2.2.3
 numpy==1.26.4
 scikit-learn==1.5.1
@@ -13,4 +14,5 @@ kaleido==1.0.0
 statsmodels==0.14.4
 joblib=1.4.2
 clust-learn=1.5.1
+
 
