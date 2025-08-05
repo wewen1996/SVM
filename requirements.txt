@@ -1,0 +1,13 @@
+python==3.9.21
+pandas==2.2.3
+numpy==2.0.2
+scikit-learn==1.6.1
+matplotlib==3.9.2
+seaborn==0.13.2
+shap==0.48.0
+imblearn==0.0
+streamlit==1.44.1
+xgboost==2.1.4
+lightgbm==4.6.0
+catboost==1.2.8
+kaleido==1.0.0
