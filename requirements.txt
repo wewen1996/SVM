@@ -12,7 +12,8 @@ lightgbm==4.6.0
 catboost==1.2.8
 kaleido==1.0.0
 statsmodels==0.14.4
-joblib=1.4.2
-clust-learn=1.5.1
+joblib==1.4.2
+clust-learn==1.5.1
+
 
 
