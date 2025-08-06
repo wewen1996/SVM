@@ -5,9 +5,7 @@ import pandas as pd
 import shap
 import matplotlib.pyplot as plt
 
-
-
-# 设置matplotlib中文字体
+# 设置 matplotlib 中文字体
 plt.rcParams["font.family"] = ["SimHei", "WenQuanYi Micro Hei", "Heiti TC", "Times New Roman"]
 
 # 加载保存的模型
@@ -107,46 +105,58 @@ if st.button("预测"):
     background = pd.DataFrame([[v["default"] for v in feature_ranges.values()]], 
                              columns=feature_ranges.keys())
     
-    # 计算SHAP值
+    # 定义预测函数（返回正类概率），适配SHAP解释
+    def predict_fn(X):
+        return model.predict_proba(X)[:, 1]  # 只关注正类概率
+    
+    # 初始化解释器（使用KernelExplainer）
     with st.spinner("正在计算特征重要性..."):
-        explainer = shap.KernelExplainer(model.predict_proba, background)
-        shap_values = explainer.shap_values(features_df)
+        try:
+            explainer = shap.KernelExplainer(predict_fn, background)
+            shap_values = explainer.shap_values(features_df)
+            
+            # 处理shap_values维度，二分类场景下shap_values是一个数组（对应正类）
+            # 若shap_values是列表且长度为1（单元素），则取该元素
+            if isinstance(shap_values, list) and len(shap_values) == 1:
+                shap_values_positive = shap_values[0]
+            else:
+                shap_values_positive = shap_values  # 直接使用
+            
+            # 1. 显示单个样本的力导向图
+            st.write("### 特征对当前预测的影响:")
+            force_plot = shap.force_plot(
+                explainer.expected_value,  # 正类的基准值
+                shap_values_positive[0],      # 当前样本的SHAP值
+                features_df.iloc[0],          # 当前样本特征值
+                matplotlib=False,
+                show=False
+            )
+            
+            # 保存为力导向图HTML并显示
+            shap.save_html("shap_force_plot.html", force_plot)
+            st.components.v1.html(open("shap_force_plot.html", "r").read(), height=200)
+            
+            # 2. 显示特征重要性摘要图（bar类型）
+            st.write("### 特征重要性排序:")
+            plt.figure(figsize=(10, 8))
+            shap.summary_plot(shap_values_positive, features_df, feature_names=feature_ranges.keys(), plot_type="bar")
+            plt.title("特征重要性（对预测结果的影响程度）")
+            plt.tight_layout()
+            st.pyplot(plt.gcf())
+            plt.close()
+            
+            # 3. 显示SHAP蜂群图，展示特征值与影响关系
+            st.write("### 特征值与预测影响的关系:")
+            plt.figure(figsize=(10, 8))
+            shap.summary_plot(shap_values_positive, features_df, feature_names=feature_ranges.keys())
+            plt.title("特征值对预测结果的影响分布")
+            plt.tight_layout()
+            st.pyplot(plt.gcf())
+            plt.close()
+            
+            st.info("SHAP值解释: 正值表示该特征增加事件发生风险，负值表示降低风险。值的大小表示影响程度。")
         
-        # 对于二分类问题，我们关注正类的SHAP值
-        shap_values_positive = shap_values[1]
-        
-        # 1. 显示单个样本的力导向图
-        st.write("### 特征对当前预测的影响:")
-        force_plot = shap.force_plot(
-            explainer.expected_value[1],  # 正类的基准值
-            shap_values_positive[0],      # 当前样本的SHAP值
-            features_df.iloc[0],          # 当前样本特征值
-            matplotlib=False,
-            show=False
-        )
-        
-        # 保存为力导向图HTML并显示
-        shap.save_html("shap_force_plot.html", force_plot)
-        st.components.v1.html(open("shap_force_plot.html", "r").read(), height=200)
-        
-        # 2. 显示特征重要性摘要图
-        st.write("### 特征重要性排序:")
-        plt.figure(figsize=(10, 8))
-        shap.summary_plot(shap_values_positive, features_df, feature_names=feature_ranges.keys(), plot_type="bar")
-        plt.title("特征重要性（对预测结果的影响程度）")
-        plt.tight_layout()
-        st.pyplot(plt.gcf())
-        plt.close()
-        
-        # 3. 显示SHAP蜂群图，展示特征值与影响关系
-        st.write("### 特征值与预测影响的关系:")
-        plt.figure(figsize=(10, 8))
-        shap.summary_plot(shap_values_positive, features_df, feature_names=feature_ranges.keys())
-        plt.title("特征值对预测结果的影响分布")
-        plt.tight_layout()
-        st.pyplot(plt.gcf())
-        plt.close()
-        
-        st.info("SHAP值解释: 正值表示该特征增加事件发生风险，负值表示降低风险。值的大小表示影响程度。")
-
-
+        except IndexError as e:
+            st.error(f"SHAP计算时出现索引错误: {str(e)}，可能是SHAP值维度不匹配，请检查模型预测输出格式。")
+        except Exception as e:
+            st.error(f"SHAP分析出错: {str(e)}")
