@@ -92,21 +92,23 @@ if st.button("Predict"):
     )
     ax.axis('off')
     plt.savefig("prediction_text.png", bbox_inches='tight', dpi=300)
+    plt.close(fig)  # 关闭当前fig
     st.image("prediction_text.png")
 
     # 计算 SHAP 值
-    explainer = shap.TreeExplainer(model)
+    explainer = shap.KernelExplainer(model.predict_proba, pd.DataFrame([feature_values], columns=feature_ranges.keys()))
     shap_values = explainer.shap_values(pd.DataFrame([feature_values], columns=feature_ranges.keys()))
 
     # 生成 SHAP 力图
     class_index = predicted_class  # 当前预测类别
     shap_fig = shap.force_plot(
-        explainer.expected_value[class_index],
-        shap_values[::,class_index],
-        pd.DataFrame([feature_values], columns=feature_ranges.keys()),
-        matplotlib=True,
+               explainer.expected_value[class_index],  # 基值
+               shap_values[class_index],  # 当前类别的SHAP值（注意索引调整）
+               pd.DataFrame([feature_values], columns=feature_ranges.keys()),
+               matplotlib=True
     )
     # 保存并显示 SHAP 图
     plt.savefig("shap_force_plot.png", bbox_inches='tight', dpi=1200)
+    plt.close()  # 关闭当前SHAP图的fig
     st.image("shap_force_plot.png")
 
