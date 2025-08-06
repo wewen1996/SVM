@@ -1,21 +1,21 @@
-```plaintext
+
 import streamlit as st
 import joblib
 import numpy as np
 import pandas as pd
 import shap
 import matplotlib.pyplot as plt
-```
+
 
 ## 加载保存的随机森林模型
 
-```plaintext
+
 model = joblib.load('svm_model.pkl')
-```
+
 
 ## 特征范围定义（根据提供的特征范围和数据类型）
 
-```plaintext
+
 feature_ranges = {
     "BSA":{"type": "numerical", "min": 0.000, "max": 5.000, "default": 1.730 },
     "Syncope": {"type": "categorical", "options": [0, 1], "default": 0},
@@ -34,17 +34,17 @@ feature_ranges = {
     "DBP": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 95.00},
     "HR": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 84.00},
 }
-```
+
 
 ## Streamlit 界面
 
-```plaintext
+
 st.title("Prediction Model with SHAP Visualization")
-```
+
 
 ## 动态生成输入项
 
-```plaintext
+
 st.header("Enter the following feature values:")
 feature_values = []
 for feature, properties in feature_ranges.items():
@@ -61,17 +61,17 @@ for feature, properties in feature_ranges.items():
             options=properties["options"],
         )
     feature_values.append(value)
-```
+
 
 ## 转换为模型输入格式
 
-```plaintext
+
 features = np.array([feature_values])
-```
+
 
 ## 预测与 SHAP 可视化
 
-```plaintext
+
 if st.button("Predict"):
     # 模型预测
     predicted_class = model.predict(features)[0]
@@ -109,4 +109,4 @@ if st.button("Predict"):
     # 保存并显示 SHAP 图
     plt.savefig("shap_force_plot.png", bbox_inches='tight', dpi=1200)
     st.image("shap_force_plot.png")
-```
+
