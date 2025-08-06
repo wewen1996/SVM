@@ -4,7 +4,9 @@ import numpy as np
 import pandas as pd
 import shap
 import matplotlib.pyplot as plt
-from kaleido.scopes import PlotlyScope
+from kaleido.scopes.plotly import PlotlyScope
+scope = PlotlyScope()
+
 
 # 设置matplotlib中文字体
 plt.rcParams["font.family"] = ["SimHei", "WenQuanYi Micro Hei", "Heiti TC", "Times New Roman"]
@@ -147,3 +149,4 @@ if st.button("预测"):
         plt.close()
         
         st.info("SHAP值解释: 正值表示该特征增加事件发生风险，负值表示降低风险。值的大小表示影响程度。")
+
