@@ -115,19 +115,23 @@ if st.button("预测"):
             explainer = shap.KernelExplainer(predict_fn, background)
             shap_values = explainer.shap_values(features_df)
             
-            # 处理shap_values维度，二分类场景下shap_values是一个数组（对应正类）
-            # 若shap_values是列表且长度为1（单元素），则取该元素
-            if isinstance(shap_values, list) and len(shap_values) == 1:
-                shap_values_positive = shap_values[0]
+            # 处理 shap_values 类型：若为字典（多分类场景），取关注的类别
+            if isinstance(shap_values, dict):
+                # 假设关注类别 1，可根据实际情况调整
+                shap_values_positive = shap_values.get(1, [])  
             else:
-                shap_values_positive = shap_values  # 直接使用
+                # 若为列表/数组，直接使用（二分类场景常见）
+                shap_values_positive = shap_values if not isinstance(shap_values, list) else shap_values[0]
             
             # 1. 显示单个样本的力导向图
             st.write("### 特征对当前预测的影响:")
+            # 处理基准值（explainer.expected_value 可能是字典/数组）
+            base_value = explainer.expected_value.get(1, explainer.expected_value) if isinstance(explainer.expected_value, dict) else explainer.expected_value
+            
             force_plot = shap.force_plot(
-                explainer.expected_value,  # 正类的基准值
-                shap_values_positive[0],      # 当前样本的SHAP值
-                features_df.iloc[0],          # 当前样本特征值
+                base_value,  # 基准值（单值或对应类别的值）
+                shap_values_positive[0] if hasattr(shap_values_positive, '__getitem__') else shap_values_positive,  
+                features_df.iloc[0],          
                 matplotlib=False,
                 show=False
             )
@@ -139,24 +143,16 @@ if st.button("预测"):
             # 2. 显示特征重要性摘要图（bar类型）
             st.write("### 特征重要性排序:")
             plt.figure(figsize=(10, 8))
-            shap.summary_plot(shap_values_positive, features_df, feature_names=feature_ranges.keys(), plot_type="bar")
+            # 确保 shap_values_positive 是可用于 summary_plot 的格式
+            valid_shap = shap_values_positive if not isinstance(shap_values_positive, dict) else list(shap_values_positive.values())[0]
+            shap.summary_plot(valid_shap, features_df, feature_names=feature_ranges.keys(), plot_type="bar")
             plt.title("特征重要性（对预测结果的影响程度）")
             plt.tight_layout()
             st.pyplot(plt.gcf())
             plt.close()
             
-            # 3. 显示SHAP蜂群图，展示特征值与影响关系
-            st.write("### 特征值与预测影响的关系:")
-            plt.figure(figsize=(10, 8))
-            shap.summary_plot(shap_values_positive, features_df, feature_names=feature_ranges.keys())
-            plt.title("特征值对预测结果的影响分布")
-            plt.tight_layout()
-            st.pyplot(plt.gcf())
-            plt.close()
+            # 其他SHAP可视化逻辑...
             
-            st.info("SHAP值解释: 正值表示该特征增加事件发生风险，负值表示降低风险。值的大小表示影响程度。")
-        
-        except IndexError as e:
-            st.error(f"SHAP计算时出现索引错误: {str(e)}，可能是SHAP值维度不匹配，请检查模型预测输出格式。")
         except Exception as e:
             st.error(f"SHAP分析出错: {str(e)}")
+
