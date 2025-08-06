@@ -139,20 +139,9 @@ if st.button("预测"):
             # 保存为力导向图HTML并显示
             shap.save_html("shap_force_plot.html", force_plot)
             st.components.v1.html(open("shap_force_plot.html", "r").read(), height=200)
-            
-            # 2. 显示特征重要性摘要图（bar类型）
-            st.write("### 特征重要性排序:")
-            plt.figure(figsize=(10, 8))
-            # 确保 shap_values_positive 是可用于 summary_plot 的格式
-            valid_shap = shap_values_positive if not isinstance(shap_values_positive, dict) else list(shap_values_positive.values())[0]
-            shap.summary_plot(valid_shap, features_df, feature_names=feature_ranges.keys(), plot_type="bar")
-            plt.title("特征重要性（对预测结果的影响程度）")
-            plt.tight_layout()
-            st.pyplot(plt.gcf())
-            plt.close()
-            
-            # 其他SHAP可视化逻辑...
+        
             
         except Exception as e:
             st.error(f"SHAP分析出错: {str(e)}")
+
 
