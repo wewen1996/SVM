@@ -81,7 +81,7 @@ if st.button("Predict"):
     probability = predicted_proba[predicted_class] * 100
 
     # 显示预测结果，使用 Matplotlib 渲染指定字体
-    text = f"Based on feature values, predicted possibility of AKI is {probability:.2f}%"
+    text = f"Based on feature values, predicted possibility of MACE occurrence in PIMSRA is {probability:.2f}%"
     fig, ax = plt.subplots(figsize=(8, 1))
     ax.text(
         0.5, 0.5, text,
@@ -110,13 +110,18 @@ if st.button("Predict"):
     shap_fig = shap.force_plot(
         explainer.expected_value[class_index] if len(explainer.expected_value) > class_index else explainer.expected_value,
         shap_values_for_class,
-        pd.DataFrame([feature_values], columns=feature_ranges.keys()),
-        matplotlib=True
+        pd.DataFrame([feature_values], columns=feature_ranges.keys())
     )
     
     # 保存并显示 SHAP 图
-    plt.savefig("shap_force_plot.png", bbox_inches='tight', dpi=1200)
-    plt.close()  # 关闭当前SHAP图的fig
-    st.image("shap_force_plot.png")
+    shap.save_html("shap_force_plot.html", shap_fig)  # 先保存为HTML
+    # 使用kaleido将HTML转换为PNG
+    from kaleido.scopes import PlotlyScope
+    scope = PlotlyScope()
+    with open("shap_force_plot.png", "wb") as f:
+        f.write(scope.transform(shap_fig))
+    
+    st.image("shap_force_plot.png")  # 显示图像
+
 
 
