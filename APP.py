@@ -17,20 +17,21 @@ def load_assets():
         # 加载资源
         with open('best_svm_model.pkl', 'rb') as f:
             model = pickle.load(f)
+            
         with open('data_scaler.pkl', 'rb') as f:
             scaler = pickle.load(f)
-    
-    with open('feature_order.pkl', 'rb') as f:
-        feature_order = pickle.load(f)  # 这里加载的是简写列表
-        
-    return model, scaler, feature_order
+            
+        with open('feature_order.pkl', 'rb') as f:
+            feature_order = pickle.load(f)  # 这里加载的是简写列表
+            
+        return model, scaler, feature_order
 
-except FileNotFoundError as e:
-    st.error(f"未找到必要文件: {e.filename}")
-    return None, None, None
-except Exception as e:
-    st.error(f"加载资源出错: {str(e)}")
-    return None, None, None
+    except FileNotFoundError as e:
+        st.error(f"未找到必要文件: {e.filename}")
+        return None, None, None
+    except Exception as e:
+        st.error(f"加载资源出错: {str(e)}")
+        return None, None, None
 
 #  定义变量简写与全称的映射关系
 FEATURE_NAME_MAPPING = {
@@ -51,8 +52,6 @@ FEATURE_NAME_MAPPING = {
     "Diastolic blood pressure": "DBP",
     "Heart rate": "HR"
 }
-
-
 
 # 特征范围定义（包含类型信息用于区分连续/分类特征）
 feature_ranges = {
@@ -139,5 +138,6 @@ if model and scaler and feature_order:
                 columns=[f"类别 {i}" for i in range(proba.shape[1])]
             )
             st.dataframe(prob_df.style.format("{:.2%}"))
+
 
 
