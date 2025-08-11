@@ -18,7 +18,7 @@ def load_assets():
         with open('best_svm_model.pkl', 'rb') as f:
             model = pickle.load(f)
         with open('data_scaler.pkl', 'rb') as f:
-        scaler = pickle.load(f)
+            scaler = pickle.load(f)
     
     with open('feature_order.pkl', 'rb') as f:
         feature_order = pickle.load(f)  # 这里加载的是简写列表
@@ -139,4 +139,5 @@ if model and scaler and feature_order:
                 columns=[f"类别 {i}" for i in range(proba.shape[1])]
             )
             st.dataframe(prob_df.style.format("{:.2%}"))
+
 
