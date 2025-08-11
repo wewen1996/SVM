@@ -4,36 +4,14 @@ import numpy as np
 import pandas as pd
 import shap
 import matplotlib.pyplot as plt
-import pickle
 
+# 设置页面标题
+st.title("PIMSRA围手术期MACE预测模型")
 
 # 设置matplotlib字体
 plt.rcParams["font.family"] = ["SimHei", "WenQuanYi Micro Hei", "Heiti TC", "Times New Roman"]
 plt.rcParams["axes.unicode_minus"] = False  # 解决负号显示问题
-
-# 加载保存的模型和相关组件
-@st.cache_resource
-def load_assets():
-    try:
-        # 加载资源
-        with open('best_svm_model.pkl', 'rb') as f:
-            model = pickle.load(f)
-            
-        with open('data_scaler.pkl', 'rb') as f:
-            scaler = pickle.load(f)
-            
-        with open('feature_order.pkl', 'rb') as f:
-            feature_order = pickle.load(f)  # 这里加载的是简写列表
-            
-        return model, scaler, feature_order
-
-    except FileNotFoundError as e:
-        st.error(f"未找到必要文件: {e.filename}")
-        return None, None, None
-    except Exception as e:
-        st.error(f"加载资源出错: {str(e)}")
-        return None, None, None
-
+        
 #  定义变量简写与全称的映射关系
 FEATURE_NAME_MAPPING = {
     "Body Surface Area": "BSA",
@@ -74,6 +52,25 @@ feature_ranges = {
     "Heart rate": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 84.00},
 }
 
+# 加载保存的模型和相关组件
+@st.cache_resource
+def load_assets():
+    try:
+        # 使用joblib加载资源
+        model = joblib.load('best_svm_model.pkl')
+        scaler = joblib.load('data_scaler.pkl')
+        feature_order = joblib.load('feature_order.pkl')  # 这里加载的是简写列表
+        
+        return model, scaler, feature_order
+    
+    except FileNotFoundError as e:
+        st.error(f"未找到必要文件: {e.filename}")
+        return None, None, None
+    except Exception as e:
+        st.error(f"加载资源出错: {str(e)}")
+        return None, None, None
+
+# 加载资源
 model, scaler, feature_order = load_assets()
 
 if model and scaler and feature_order:
@@ -139,6 +136,7 @@ if model and scaler and feature_order:
                 columns=[f"类别 {i}" for i in range(proba.shape[1])]
             )
             st.dataframe(prob_df.style.format("{:.2%}"))
+
 
 
 
