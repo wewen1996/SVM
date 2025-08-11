@@ -1,8 +1,8 @@
-BSA
-NTproBNP
-Hct
-LVOTGmax
-Cr
-MWT
-DBP
-HR
+Body Surface Area
+N-terminal pro B-type natriuretic peptide
+Hematocrit
+Maximal left ventricular outflow tract gradients
+Creatinine
+Maximum wall thickness
+Diastolic blood pressure
+Heart rate
