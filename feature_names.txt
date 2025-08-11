@@ -1,0 +1,16 @@
+BSA
+Syncope
+NTproBNP
+Hct
+LVOTGmax
+PH
+ABPR
+PriorSRT
+ACEIARB
+Diuretics
+AAD
+Cr
+MWT
+SAMmod
+DBP
+HR
