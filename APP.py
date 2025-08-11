@@ -35,6 +35,28 @@ def load_models():
         st.error(f"加载模型时出错: {str(e)}")
         return None, None, None, None, None
 
+#  定义变量简写与全称的映射关系
+FEATURE_NAME_MAPPING = {
+    "Body Surface Area": "BSA",
+    "History of syncope": "Syncope",
+    "N-terminal pro B-type natriuretic peptide": "NTproBNP",
+    "Hematocrit": "Hct",
+    "Maximal left ventricular outflow tract gradients": "LVOTGmax",
+    "Pulmonary hypertension": "PH",
+    "Abnormal exercise blood pressure response": "ABPR",
+​    "History of Septal Reduction Therapy": "PriorSRT",
+​    "Usage of Angiotensin Converting Enzyme Inhibitors or Angiotensin Receptor Blockers": "ACEIARB",
+    "Usage of diuretics": "Diuretics",
+    "Usage of anticoagulant or antiplatelet drugs": "AAD",
+    "Creatinine": "Cr",
+    "Maximum wall thickness": "MWT",
+    "Moderate to severe Systolic Anterior Motion": "SAMmod",
+    "Diastolic blood pressure": "DBP",
+    "Heart rate": "HR"
+}
+
+
+
 # 特征范围定义（包含类型信息用于区分连续/分类特征）
 feature_ranges = {
     "Body Surface Area":{"type": "numerical", "min": 0.000, "max": 5.000, "default": 1.730 },
@@ -290,3 +312,4 @@ with open('feature_names.txt', 'w') as f:
     for name in X_train.columns:
         f.write(f"{name}\\n")
     """, language="python")
+
