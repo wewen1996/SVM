@@ -4,7 +4,8 @@ import numpy as np
 import pandas as pd
 import shap
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import LabelEncoder
+import pickle
+
 
 # 设置matplotlib字体
 plt.rcParams["font.family"] = ["SimHei", "WenQuanYi Micro Hei", "Heiti TC", "Times New Roman"]
@@ -138,6 +139,7 @@ if model and scaler and feature_order:
                 columns=[f"类别 {i}" for i in range(proba.shape[1])]
             )
             st.dataframe(prob_df.style.format("{:.2%}"))
+
 
 
 
