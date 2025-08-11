@@ -1,16 +1,17 @@
-BSA
-Syncope
-NTproBNP
-Hct
-LVOTGmax
-PH
-ABPR
-PriorSRT
-ACEIARB
-Diuretics
-AAD
-Cr
-MWT
-SAMmod
-DBP
-HR
+Body Surface Area
+History of syncope
+N-terminal pro B-type natriuretic peptide
+Hematocrit
+Maximal left ventricular outflow tract gradients
+Pulmonary hypertension
+Abnormal exercise blood pressure response
+History of Septal Reduction Therapy
+Usage of Angiotensin Converting Enzyme Inhibitors or Angiotensin Receptor Blockers
+Usage of diuretics
+Usage of anticoagulant or antiplatelet drugs
+Creatinine
+Maximum wall thickness
+Moderate to severe Systolic Anterior Motion
+Diastolic blood pressure
+Heart rate
+
