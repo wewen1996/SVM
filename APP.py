@@ -34,22 +34,22 @@ FEATURE_NAME_MAPPING = {
 
 # 特征范围定义（包含类型信息用于区分连续/分类特征）
 FEATURE_INFO = {
-    "Body Surface Area":{"type": "numerical", "min": 0.000, "max": 5.000, "default": 1.730 },
-    "History of syncope": {"type": "categorical", "options": [0, 1], "default": 0},
-    "N-terminal pro B-type natriuretic peptide": {"type": "numerical", "min": 0.000, "max": 50000.000, "default": 670.236},
-    "Hematocrit": {"type": "numerical", "min": 0.000, "max": 1.000, "default": 0.411},
-    "Maximal left ventricular outflow tract gradients": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 102.800},
-    "Pulmonary hypertension": {"type": "categorical", "options": [0, 1], "default": 0},
-    "Abnormal exercise blood pressure response": {"type": "categorical", "options": [0, 1], "default": 0},
-    "History of Septal Reduction Therapy": {"type": "categorical", "options": [0, 1], "default": 0},
-    "Usage of Angiotensin Converting Enzyme Inhibitors or Angiotensin Receptor Blockers": {"type": "categorical", "options": [0, 1], "default": 0},
-    "Usage of diuretics": {"type": "categorical", "options": [0, 1], "default": 1},
-    "Usage of anticoagulant or antiplatelet drugs": {"type": "categorical", "options": [0, 1], "default": 1},
-    "Creatinine": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 87.00},
-    "Maximum wall thickness": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 37.00},
-    "Moderate to severe Systolic Anterior Motion": {"type": "categorical", "options": [0, 1], "default": 1},
-    "Diastolic blood pressure": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 95.00},
-    "Heart rate": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 84.00},
+    "BSA":{"type": "numerical", "min": 0.000, "max": 5.000, "default": 1.730 },
+    "Syncope": {"type": "categorical", "options": [0, 1], "default": 0},
+    "NTproBNP": {"type": "numerical", "min": 0.000, "max": 50000.000, "default": 670.236},
+    "Hct": {"type": "numerical", "min": 0.000, "max": 1.000, "default": 0.411},
+    "LVOTGmax": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 102.800},
+    "PH": {"type": "categorical", "options": [0, 1], "default": 0},
+    "ABPR": {"type": "categorical", "options": [0, 1], "default": 0},
+    "PriorSRT": {"type": "categorical", "options": [0, 1], "default": 0},
+    "ACEIARB": {"type": "categorical", "options": [0, 1], "default": 0},
+    "Diuretics": {"type": "categorical", "options": [0, 1], "default": 1},
+    "AAD": {"type": "categorical", "options": [0, 1], "default": 1},
+    "Cr": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 87.00},
+    "MWT": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 37.00},
+    "SAMmod": {"type": "categorical", "options": [0, 1], "default": 1},
+    "DBP": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 95.00},
+    "HR": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 84.00},
 }
 
 # 加载保存的模型和相关组件
@@ -136,6 +136,7 @@ if model and scaler and feature_order:
                 columns=[f"类别 {i}" for i in range(proba.shape[1])]
             )
             st.dataframe(prob_df.style.format("{:.2%}"))
+
 
 
 
