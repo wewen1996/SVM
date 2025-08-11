@@ -33,7 +33,7 @@ FEATURE_NAME_MAPPING = {
 }
 
 # 特征范围定义（包含类型信息用于区分连续/分类特征）
-feature_ranges = {
+FEATURE_INFO = {
     "Body Surface Area":{"type": "numerical", "min": 0.000, "max": 5.000, "default": 1.730 },
     "History of syncope": {"type": "categorical", "options": [0, 1], "default": 0},
     "N-terminal pro B-type natriuretic peptide": {"type": "numerical", "min": 0.000, "max": 50000.000, "default": 670.236},
@@ -136,6 +136,7 @@ if model and scaler and feature_order:
                 columns=[f"类别 {i}" for i in range(proba.shape[1])]
             )
             st.dataframe(prob_df.style.format("{:.2%}"))
+
 
 
 
