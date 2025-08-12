@@ -14,22 +14,22 @@ plt.rcParams["axes.unicode_minus"] = False  # 解决负号显示问题
         
 #  定义变量简写与全称的映射关系
 FEATURE_NAME_MAPPING = {
-    "Body Surface Area": "BSA",
-    "History of syncope": "Syncope",
-    "N-terminal pro B-type natriuretic peptide": "NTproBNP",
-    "Hematocrit": "Hct",
-    "Maximal left ventricular outflow tract gradients": "LVOTGmax",
-    "Pulmonary hypertension": "PH",
-    "Abnormal exercise blood pressure response": "ABPR",
-    "History of Septal Reduction Therapy": "PriorSRT",
-    "Usage of Angiotensin Converting Enzyme Inhibitors or Angiotensin Receptor Blockers": "ACEIARB",
-    "Usage of diuretics": "Diuretics",
-    "Usage of anticoagulant or antiplatelet drugs": "AAD",
-    "Creatinine": "Cr",
-    "Maximum wall thickness": "MWT",
-    "Moderate to severe Systolic Anterior Motion": "SAMmod",
-    "Diastolic blood pressure": "DBP",
-    "Heart rate": "HR"
+    "BSA": "Body Surface Area" ,
+    "Syncope": "History of syncope" ,
+    "NTproBNP":"N-terminal pro B-type natriuretic peptide",
+    "Hct":"Hematocrit",
+    "LVOTGmax": "Maximal left ventricular outflow tract gradients" ,
+    "PH": "Pulmonary hypertension",
+    "ABPR": "Abnormal exercise blood pressure response",
+    "PriorSRT": "History of Septal Reduction Therapy",
+    "ACEIARB": "Usage of Angiotensin Converting Enzyme Inhibitors or Angiotensin Receptor Blockers",
+    "Diuretics": "Usage of diuretics",
+    "AAD":"Usage of anticoagulant or antiplatelet drugs",
+    "Cr":"Creatinine",
+    "MWT":"Maximum wall thickness",
+    "SAMmod":"Moderate to severe Systolic Anterior Motion",
+    "DBP": "Diastolic blood pressure",
+    "HR": "Heart rate"
 }
 
 # 特征范围定义（包含类型信息用于区分连续/分类特征）
@@ -136,6 +136,7 @@ if model and scaler and feature_order:
                 columns=[f"类别 {i}" for i in range(proba.shape[1])]
             )
             st.dataframe(prob_df.style.format("{:.2%}"))
+
 
 
 
