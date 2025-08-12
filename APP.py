@@ -15,20 +15,20 @@ plt.rcParams["axes.unicode_minus"] = False
 FEATURE_INFO = {
     "Body Surface Area": {"type": "numerical", "min": 0.000, "max": 5.000, "default": 1.730},
     "History of syncope": {"type": "categorical", "options": [0, 1], "default": 0, "labels": ["No", "Yes"]},
-    "N-terminal pro B-type natriuretic peptide": {"type": "numerical", "min": 0.000, "max": 50000.000, "default": 670.236},
+    "N-terminal pro B-type natriuretic peptide": {"type": "numerical", "min": 0.000, "max": 10000.000, "default": 670.236},
     "Hematocrit": {"type": "numerical", "min": 0.000, "max": 1.000, "default": 0.411},
-    "Maximal left ventricular outflow tract gradients": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 102.800},
+    "Maximal left ventricular outflow tract gradients": {"type": "numerical", "min": 0.000, "max": 500.000, "default": 102.800},
     "Pulmonary hypertension": {"type": "categorical", "options": [0, 1], "default": 0, "labels": ["No", "Yes"]},
     "Abnormal exercise blood pressure response": {"type": "categorical", "options": [0, 1], "default": 0, "labels": ["No", "Yes"]},
     "History of Septal Reduction Therapy": {"type": "categorical", "options": [0, 1], "default": 0, "labels": ["No", "Yes"]},
     "Usage of Angiotensin Converting Enzyme Inhibitors or Angiotensin Receptor Blockers": {"type": "categorical", "options": [0, 1], "default": 0, "labels": ["No", "Yes"]},
     "Usage of diuretics": {"type": "categorical", "options": [0, 1], "default": 1, "labels": ["No", "Yes"]},
     "Usage of anticoagulant or antiplatelet drugs": {"type": "categorical", "options": [0, 1], "default": 1, "labels": ["No", "Yes"]},
-    "Creatinine": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 87.00},
-    "Maximum wall thickness": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 37.00},
+    "Creatinine": {"type": "numerical", "min": 0.000, "max": 500.000, "default": 87.00},
+    "Maximum wall thickness": {"type": "numerical", "min": 0.000, "max": 500.000, "default": 37.00},
     "Moderate to severe Systolic Anterior Motion": {"type": "categorical", "options": [0, 1], "default": 1, "labels": ["No", "Yes"]},
-    "Diastolic blood pressure": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 95.00},
-    "Heart rate": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 84.00},
+    "Diastolic blood pressure": {"type": "numerical", "min": 0.000, "max": 500.000, "default": 95.00},
+    "Heart rate": {"type": "numerical", "min": 0.000, "max": 500.000, "default": 84.00},
 }
 
 # 加载所有必要的组件
@@ -207,9 +207,9 @@ if model and scaler and model_feature_names:
                 st.success('低风险: 患者围手术期MACE风险较低')
             
             # 显示概率分布
-            st.subheader("概率分布")
+            st.subheader("Probability distribution")
             prob_data = {
-                "类别": ["阴性 (Negative)", "阳性 (Positive)"],
+                "类别": ["Negative", "Positive"],
                 "概率": [1 - positive_prob, positive_prob]
             }
             prob_df = pd.DataFrame(prob_data)
@@ -287,3 +287,4 @@ st.markdown("""
 **PIMSRA围手术期MACE预测模型** © 2023 心血管研究所  
 *本工具仅用于临床辅助决策，不能替代专业医疗判断*
 """)
+
