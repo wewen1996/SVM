@@ -218,8 +218,8 @@ if model and scaler and model_feature_names:
             fig, ax = plt.subplots(figsize=(8, 4))
             ax.bar(prob_df["类别"], prob_df["概率"], color=['#4CAF50', '#F44336'])
             ax.set_ylim(0, 1)
-            ax.set_ylabel("概率")
-            ax.set_title("预测概率分布")
+            ax.set_ylabel("Probability")
+            ax.set_title("Predicted probability distribution")
             
             # 在柱子上显示数值
             for i, v in enumerate(prob_df["概率"]):
@@ -287,4 +287,5 @@ st.markdown("""
 **PIMSRA围手术期MACE预测模型** © 2023 心血管研究所  
 *本工具仅用于临床辅助决策，不能替代专业医疗判断*
 """)
+
 
