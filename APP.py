@@ -12,7 +12,7 @@ st.title("PIMSRA围手术期MACE预测模型")
 plt.rcParams["font.family"] = ["SimHei", "WenQuanYi Micro Hei", "Heiti TC", "Times New Roman"]
 plt.rcParams["axes.unicode_minus"] = False  # 解决负号显示问题
         
-#  定义变量简写与全称的映射关系
+# 定义变量简写与全称的映射关系
 FEATURE_NAME_MAPPING = {
     "BSA": "Body Surface Area" ,
     "Syncope": "History of syncope" ,
@@ -35,19 +35,19 @@ FEATURE_NAME_MAPPING = {
 # 特征范围定义（包含类型信息用于区分连续/分类特征）
 FEATURE_INFO = {
     "BSA":{"type": "numerical", "min": 0.000, "max": 5.000, "default": 1.730 },
-    "Syncope": {"type": "categorical", "options": [0, 1], "default": 0},
+    "Syncope": {"type": "categorical", "options": [0, 1], "default": 0, "labels": ["No", "Yes"]},
     "NTproBNP": {"type": "numerical", "min": 0.000, "max": 50000.000, "default": 670.236},
     "Hct": {"type": "numerical", "min": 0.000, "max": 1.000, "default": 0.411},
     "LVOTGmax": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 102.800},
-    "PH": {"type": "categorical", "options": [0, 1], "default": 0},
-    "ABPR": {"type": "categorical", "options": [0, 1], "default": 0},
-    "PriorSRT": {"type": "categorical", "options": [0, 1], "default": 0},
-    "ACEIARB": {"type": "categorical", "options": [0, 1], "default": 0},
-    "Diuretics": {"type": "categorical", "options": [0, 1], "default": 1},
-    "AAD": {"type": "categorical", "options": [0, 1], "default": 1},
+    "PH": {"type": "categorical", "options": [0, 1], "default": 0, "labels": ["No", "Yes"]},
+    "ABPR": {"type": "categorical", "options": [0, 1], "default": 0, "labels": ["No", "Yes"]},
+    "PriorSRT": {"type": "categorical", "options": [0, 1], "default": 0, "labels": ["No", "Yes"]},
+    "ACEIARB": {"type": "categorical", "options": [0, 1], "default": 0, "labels": ["No", "Yes"]},
+    "Diuretics": {"type": "categorical", "options": [0, 1], "default": 1, "labels": ["No", "Yes"]},
+    "AAD": {"type": "categorical", "options": [0, 1], "default": 1, "labels": ["No", "Yes"]},
     "Cr": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 87.00},
     "MWT": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 37.00},
-    "SAMmod": {"type": "categorical", "options": [0, 1], "default": 1},
+    "SAMmod": {"type": "categorical", "options": [0, 1], "default": 1, "labels": ["No", "Yes"]},
     "DBP": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 95.00},
     "HR": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 84.00},
 }
@@ -88,29 +88,41 @@ if model and scaler and feature_order:
         feature_fullname = FEATURE_NAME_MAPPING.get(feature, feature)
         info = FEATURE_INFO.get(feature, {})
         
-        if info.get("type") == "continuous":
-            # 连续特征使用滑块
+        # 修复：使用与FEATURE_INFO中一致的"numerical"类型判断
+        if info.get("type") == "numerical":
+            # 连续特征使用滑块，使用定义的default值
             input_data[feature] = st.slider(
                 feature_fullname,  # 显示全称
-                min_value=info.get("min", 0),
-                max_value=info.get("max", 100),
-                value=(info.get("min", 0) + info.get("max", 100)) / 2
+                min_value=info.get("min", 0.0),
+                max_value=info.get("max", 100.0),
+                value=info.get("default", (info.get("min", 0.0) + info.get("max", 100.0)) / 2),
+                format="%.3f"  # 显示三位小数，适应医学数据精度
             )
-        else:
-            # 分类特征使用单选按钮或选择框
-            if info.get("type") == "binary":
-                # 二分类特征
-                input_data[feature] = st.radio(
-                    feature_fullname,  # 显示全称
-                    options=info.get("options", [0, 1]),
-                    format_func=lambda x: "是" if x == 1 else "否" if len(info.get("options", [])) == 2 else str(x)
-                )
-            else:
-                # 多分类特征
-                input_data[feature] = st.selectbox(
-                    feature_fullname,  # 显示全称
-                    options=info.get("options", [])
-                )
+            
+            # 为连续变量添加数值输入选项，方便精确输入
+            st.caption(f"精确输入 {feature_fullname} 的值:")
+            input_data[feature] = st.number_input(
+                label=f"{feature_fullname} (精确值)",
+                min_value=info.get("min", 0.0),
+                max_value=info.get("max", 100.0),
+                value=input_data[feature],
+                format="%.3f",
+                key=f"{feature}_number"  # 唯一key避免冲突
+            )
+            
+        elif info.get("type") == "categorical":
+            # 分类特征使用选择框，并显示友好标签
+            options = info.get("options", [0, 1])
+            labels = info.get("labels", ["No", "Yes"]) if len(options) == 2 else [str(option) for option in options]
+            
+            # 使用选择框展示分类选项
+            selected_idx = st.selectbox(
+                feature_fullname,
+                range(len(options)),
+                format_func=lambda x: labels[x],
+                index=options.index(info.get("default", 0))  # 设置默认值
+            )
+            input_data[feature] = options[selected_idx]
     
     # 转换为DataFrame并保持特征顺序（使用简写）
     input_df = pd.DataFrame([input_data], columns=feature_order)
@@ -136,12 +148,3 @@ if model and scaler and feature_order:
                 columns=[f"类别 {i}" for i in range(proba.shape[1])]
             )
             st.dataframe(prob_df.style.format("{:.2%}"))
-
-
-
-
-
-
-
-
-
