@@ -9,9 +9,9 @@ st.title("PIMSRA围手术期MACE预测模型")
 
 # 设置matplotlib字体
 plt.rcParams["font.family"] = ["SimHei", "WenQuanYi Micro Hei", "Heiti TC", "Times New Roman"]
-plt.rcParams["axes.unicode_minus"] = False  # 解决负号显示问题
+plt.rcParams["axes.unicode_minus"] = False
 
-# 定义变量简写与全称的映射关系（界面显示用）
+# 1. 核心映射：简写（实际用）→ 全称（显示用）
 FEATURE_NAME_MAPPING = {
     "BSA": "Body Surface Area",
     "Syncope": "History of syncope",
@@ -31,7 +31,7 @@ FEATURE_NAME_MAPPING = {
     "HR": "Heart rate"
 }
 
-# 特征范围定义（包含类型信息）
+# 2. 特征元信息（基于简写定义）
 FEATURE_INFO = {
     "BSA": {"type": "numerical", "min": 0.000, "max": 5.000, "default": 1.730},
     "Syncope": {"type": "categorical", "options": [0, 1], "default": 0, "labels": ["No", "Yes"]},
@@ -51,120 +51,115 @@ FEATURE_INFO = {
     "HR": {"type": "numerical", "min": 0.000, "max": 1000.000, "default": 84.00},
 }
 
-# 加载模型和相关组件
+# 3. 加载模型和核心特征信息
 @st.cache_resource
 def load_assets():
     try:
         model = joblib.load('best_svm_model.pkl')
         scaler = joblib.load('data_scaler.pkl')
-        feature_order = joblib.load('feature_order.pkl')  # 简写列表
-        return model, scaler, feature_order
+        
+        # 从模型中提取训练时的特征名称（简称）和顺序（最权威的来源）
+        if hasattr(model, 'feature_names_in_'):
+            model_feature_names = list(model.feature_names_in_)
+        else:
+            # 若模型不支持feature_names_in_，则从feature_order.pkl加载（确保与训练一致）
+            model_feature_names = joblib.load('feature_order.pkl')
+        
+        return model, scaler, model_feature_names
     except FileNotFoundError as e:
-        st.error(f"未找到必要文件: {e.filename}")
+        st.error(f"未找到文件: {e.filename}")
         return None, None, None
     except Exception as e:
-        st.error(f"加载资源出错: {str(e)}")
+        st.error(f"加载资源失败: {str(e)}")
         return None, None, None
 
-# 加载资源
-model, scaler, feature_order = load_assets()
+# 4. 加载资源
+model, scaler, model_feature_names = load_assets()
 
-if model and scaler and feature_order:
+if model and scaler and model_feature_names:
     st.subheader("请输入以下信息")
     
-    # 1. 显式获取模型训练时的特征名称（关键！）
-    model_features = []
-    if hasattr(model, 'feature_names_in_'):
-        model_features = list(model.feature_names_in_)
-        st.write("模型训练时的特征名称：", model_features)  # 调试用
-    else:
-        st.warning("模型不支持查看训练时的特征名称（可能是旧版本sklearn）")
+    # 显示模型训练时的特征（供调试，确认是简称）
+    with st.expander("点击查看模型训练时的特征（调试用）"):
+        st.write("模型预期的特征名称（简称）：", model_feature_names)
     
-    # 2. 检查feature_order与模型特征的匹配性
-    if model_features:
-        # 检查是否有多余特征
-        extra_features = [f for f in feature_order if f not in model_features]
-        if extra_features:
-            st.error(f"输入包含模型未见过的特征：{extra_features}")
-        
-        # 检查是否有缺失特征
-        missing_features = [f for f in model_features if f not in feature_order]
-        if missing_features:
-            st.error(f"输入缺少模型必需的特征：{missing_features}")
-        
-        # 检查顺序是否一致
-        if feature_order != model_features:
-            st.warning("特征顺序与模型训练时不一致，可能导致预测错误！")
-            st.warning(f"模型预期顺序：{model_features}")
-            st.warning(f"当前输入顺序：{feature_order}")
-    
-    # 3. 收集用户输入（仅包含模型训练时有的特征）
+    # 5. 收集用户输入（键为简写，显示为全称）
     input_data = {}
-    # 只保留模型训练时有的特征（过滤掉多余特征）
-    valid_features = [f for f in feature_order if f in model_features] if model_features else feature_order
-    
-    for feature in valid_features:
-        feature_fullname = FEATURE_NAME_MAPPING.get(feature, feature)
-        info = FEATURE_INFO.get(feature, {})
+    for feature in model_feature_names:  # 严格按模型特征顺序遍历
+        # 确保特征在映射中存在
+        if feature not in FEATURE_NAME_MAPPING:
+            st.warning(f"特征 {feature} 缺少全称映射，将显示简写")
+            feature_fullname = feature
+        else:
+            feature_fullname = FEATURE_NAME_MAPPING[feature]
         
-        if info.get("type") == "numerical":
+        info = FEATURE_INFO.get(feature, {})
+        if not info:
+            st.error(f"特征 {feature} 缺少元信息（类型/范围）")
+            continue
+        
+        # 连续特征：滑块+精确输入
+        if info["type"] == "numerical":
             input_data[feature] = st.slider(
-                feature_fullname,
-                min_value=info.get("min", 0.0),
-                max_value=info.get("max", 100.0),
-                value=info.get("default", (info.get("min", 0.0) + info.get("max", 100.0)) / 2),
-                format="%.3f"
+                label=feature_fullname,
+                min_value=info["min"],
+                max_value=info["max"],
+                value=info["default"],
+                format="%.3f",
+                key=f"{feature}_slider"
             )
             input_data[feature] = st.number_input(
-                label=f"{feature_fullname} (精确值)",
-                min_value=info.get("min", 0.0),
-                max_value=info.get("max", 100.0),
+                label=f"{feature_fullname}（精确值）",
+                min_value=info["min"],
+                max_value=info["max"],
                 value=input_data[feature],
                 format="%.3f",
-                key=f"{feature}_number"
+                key=f"{feature}_num"
             )
-        elif info.get("type") == "categorical":
-            options = info.get("options", [0, 1])
-            labels = info.get("labels", ["No", "Yes"]) if len(options) == 2 else [str(option) for option in options]
+        
+        # 分类特征：选择框
+        elif info["type"] == "categorical":
+            options = info["options"]
+            labels = info.get("labels", [str(opt) for opt in options])
             selected_idx = st.selectbox(
-                feature_fullname,
-                range(len(options)),
-                format_func=lambda x: labels[x],
-                index=options.index(info.get("default", 0)),
-                key=f"{feature}_select"
+                label=feature_fullname,
+                options=range(len(options)),
+                format_func=lambda i: labels[i],
+                index=options.index(info["default"]),
+                key=f"{feature}_cat"
             )
             input_data[feature] = options[selected_idx]
     
-    # 4. 构建输入DataFrame（确保特征顺序与模型完全一致）
-    # 关键：用模型训练时的特征顺序，而非feature_order
-    input_columns = model_features if model_features else valid_features
-    input_df = pd.DataFrame([input_data], columns=input_columns)
+    # 6. 构建输入数据（列名=模型特征名称，顺序完全一致）
+    input_df = pd.DataFrame([input_data], columns=model_feature_names)
     
-    # 5. 预测按钮
+    # 7. 预测逻辑
     if st.button("预测"):
         try:
-            # 归一化
+            # 归一化（使用训练好的scaler）
             input_scaled = scaler.transform(input_df)
-            # 预测
-            prediction = model.predict(input_scaled)
             
+            # 模型预测
+            prediction = model.predict(input_scaled)
             st.subheader("预测结果")
             st.success(f"预测类别: {prediction[0]}")
             
+            # 显示概率（若支持）
             if hasattr(model, 'predict_proba'):
                 proba = model.predict_proba(input_scaled)
                 st.write("预测概率:")
                 prob_df = pd.DataFrame(
-                    proba, 
+                    proba,
                     columns=[f"类别 {i}" for i in range(proba.shape[1])]
                 )
                 st.dataframe(prob_df.style.format("{:.2%}"))
+        
         except Exception as e:
-            st.error(f"预测过程出错：{str(e)}")
-            # 显示详细调试信息
-            st.subheader("调试信息")
-            st.write("输入数据列名：", input_df.columns.tolist())
-            st.write("输入数据形状：", input_df.shape)
-            if model_features:
-                st.write("模型预期列名：", model_features)
-                st.write("模型预期特征数量：", len(model_features))
+            st.error(f"预测出错: {str(e)}")
+            # 详细调试信息
+            with st.expander("查看详细调试信息"):
+                st.write("输入数据列名（简称）：", input_df.columns.tolist())
+                st.write("输入数据形状：", input_df.shape)
+                st.write("模型预期特征数量：", len(model_feature_names))
+                if hasattr(scaler, 'feature_names_in_'):
+                    st.write("Scaler预期特征名称：", list(scaler.feature_names_in_))
